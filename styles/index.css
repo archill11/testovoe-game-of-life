@@ -1,0 +1,29 @@
+*{
+  box-sizing: border-box;
+}
+
+.main-wrapper {
+  border: solid 3px #000000;
+  display: flex;
+  flex-wrap: wrap;
+  margin: 4% 26%;
+  position: fixed;
+  justify-content: flex-start;
+}
+
+.cellBox { /* Стили клеток */
+  display: block;
+  width: 35px;
+  height: 35px;
+  border: solid 2px #808080;
+  background-color: #ffffff;
+}
+
+.deathCell { /* Класс мертвой клетки */
+  background-color: #000;
+}
+
+.aliveCell { /* Класс живой клетки */
+  background-color: #e48abb;
+}
+
