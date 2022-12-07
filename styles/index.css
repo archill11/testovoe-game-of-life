@@ -33,3 +33,17 @@
   width: 79%;
   font-size: 47px;
 }
+
+.generate-form {
+  display: grid;
+  gap: 10px;
+}
+.generate-button {
+  width: 30vw;
+}
+
+.display-none {
+  opacity: 0;
+}
+
+

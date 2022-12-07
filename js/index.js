@@ -1,40 +1,27 @@
-let m = 18; //высота
-let n = 20; // длинна
+let m ; //высота поля 
+let n ; // длинна поля
 
-let widthOfCell = 35;
-$('.main-wrapper').css('width', (widthOfCell * n) + 6);
 
+// массив объектов всех клеток
+// одна клетка представляет собой объект 
+// с полем (id клетки) и значение (1 или 0) жива или мертва 
 let matrix = [];
+
+// счетчик для того что бы задать id каждой клетке
 let counterId = 0;
 
+// массив элементво которые будут убиты в начале нового тика
 let tokillArr = [];
+// массив элементво которые будут активированы в начале нового тика
 let toAliveArr = [];
 
-fillMainWrapper();
-// process();
-
-function ittr() {
-  process();
-    newIteration();
-}
-// let yhu = 0;
-// while( true ) {
-//   let t = livingCells();
-//   if ( t == false) { 
-//     break;
-//   }
-//   if ( yhu > 5) { 
-//     break;
-//   }
-//   process();
-//   newIteration();
-//   // alert('new')
-// }
 
 
-
+/**
+ * Функция подсчитывает всех соседий конкретной клетки и 
+ * запускает для неё 4 оператора
+ */
 function process() {
-
   for(let i = 0; i < matrix.length; i++) {
     let current = i;
     let leftNeighbor = i - 1;
@@ -52,16 +39,19 @@ function process() {
       downLeftNeighbor = null;
       upLeftNeighbor = null;
     } 
+
     if ((current + 1) % n == 0) { // для каждого последнего в каждом столбце
       rirhtNeighbor = null;
       upLeftNeighbor = null;
       upRirhtNeighbor = null;
     } 
+
     if (current < n) { // для каждого в первом ряду
       upNeighbor = null;
       upLeftNeighbor = null;
       upRirhtNeighbor = null;
     } 
+
     if (current >= (matrix.length) - n) { // для каждого в последнем ряду
       downNeighbor = null;
       downLeftNeighbor = null;
@@ -88,7 +78,15 @@ function process() {
   }
 }
 
+/**
+ * Функция проходится по массивам toAliveArr, tokillArr 
+ * и убивает или оживляет клетку.
+ * Если живых клеток не осталось , выводит на экран сообщение Game over!
+ */
 function newIteration() {
+  if ( !livingCells()) {
+    alert('Game over!')
+  }
   for (const el of toAliveArr) {
     aliveCell(el);
     matrix[el][el] = 1;
@@ -100,6 +98,11 @@ function newIteration() {
 }
 
 
+/**
+ * Функция проверят остались ли живые клетки
+ * 
+ * @returns Boolean
+ */
 function livingCells() {
   for (const el of matrix) {
     for (const [key, value] of Object.entries(el)) {
@@ -111,32 +114,48 @@ function livingCells() {
   return false;
 }
 
+/**
+ * Функция отрисовывает поле с тем количеством клеток 
+ * которое указано в инпутах
+ */
 function fillMainWrapper() {
+  $('.generate-form').addClass('display-none')
+  $('.button').removeClass('display-none')
+  $('.main-wrapper').removeClass('display-none')
+
+
+  n = parseInt( $('.nInput').val() );
+  m = parseInt( $('.mInput').val() );
+
+  
   for (let i = 0; i < m; i++) {
     for (let j = 0; j < n; j++) {
+      
       res =  Math.round(Math.random() ) // рандомно выбираем жива клетка или мертва
+      
       if (res) { // если рандомное чило 1 
-        // добавляем живую клетку
-        $('.main-wrapper').append(
-          $('<div/>')
-          .attr("id", counterId)
-          .addClass("cellBox aliveCell")
+        $('.main-wrapper').append( // добавляем живую клетку
+        $('<div/>')
+        .attr("id", counterId)
+        .addClass("cellBox aliveCell")
         );
       }else{ // если рандомное чило 0 
-        // добавляем мертвую клетку
-        $('.main-wrapper').append(
-          $('<div/>')
+        $('.main-wrapper').append( // добавляем мертвую клетку
+        $('<div/>')
           .attr("id", counterId)
           .addClass("cellBox deathCell")
         );
       }
+      
       // добавляем id и значение клетки в массив matrix
       matrix.push( { [counterId]: res } );
       counterId++;
     }
   }
   
-  console.log(matrix);
+  let widthOfCell = $('.cellBox').width();
+  $('.main-wrapper').css('max-width', ((widthOfCell + 7) * n) ); // делаю поле клеток по ширине равным количеству клеток * ширину 1 клетки
+  
 }
 
 
@@ -152,7 +171,11 @@ function aliveCell(cellId) {
         .removeClass('deathCell');
 }
 
+
+
 function activation(obj) {
+  console.log('matrix[obj.i])[0]', matrix);
+  console.log('matrix[obj.i])[1]', obj);
   if (Object.values(matrix[obj.i])[0] == 1) {
     return;
   }
@@ -302,4 +325,13 @@ function dying(obj) {
   if ( count !== 2 || count !== 3) {
     tokillArr.push(obj.i);
   }
+}
+
+
+/**
+ * Функция запускает следующуй тик игры
+ */
+ function next() {
+  process();
+  newIteration();
 }
