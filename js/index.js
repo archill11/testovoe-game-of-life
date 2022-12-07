@@ -11,7 +11,7 @@ let matrix = [];
 let counterId = 0;
 
 // массив элементво которые будут убиты в начале нового тика
-let tokillArr = [];
+let toKillArr = [];
 // массив элементво которые будут активированы в начале нового тика
 let toAliveArr = [];
 
@@ -19,7 +19,7 @@ let toAliveArr = [];
 
 /**
  * Функция подсчитывает всех соседий конкретной клетки и 
- * запускает для неё 4 оператора
+ * запускает для неё 4 оператора ( «Активация», «Перегрузка», «Изоляция», «Вымирание» ) 
  */
 function process() {
   for(let i = 0; i < matrix.length; i++) {
@@ -33,26 +33,25 @@ function process() {
     let upLeftNeighbor = i - n + 1;
     let upRirhtNeighbor = i - n + 1;
 
-
-    if (current % n == 0) { // для каждого первого в каждом столбце
+    if (current % n == 0) { // для каждой клетки в первом столбце
       leftNeighbor = null;
       downLeftNeighbor = null;
       upLeftNeighbor = null;
     } 
 
-    if ((current + 1) % n == 0) { // для каждого последнего в каждом столбце
+    if ((current + 1) % n == 0) { // для каждой клетки в последнем столбце
       rirhtNeighbor = null;
       upLeftNeighbor = null;
       upRirhtNeighbor = null;
     } 
 
-    if (current < n) { // для каждого в первом ряду
+    if (current < n) { // для каждой клетки в первом ряду
       upNeighbor = null;
       upLeftNeighbor = null;
       upRirhtNeighbor = null;
     } 
 
-    if (current >= (matrix.length) - n) { // для каждого в последнем ряду
+    if (current >= (matrix.length) - n) { // для каждой клетки в последнем ряду
       downNeighbor = null;
       downLeftNeighbor = null;
       downRirhtNeighbor = null;
@@ -74,12 +73,11 @@ function process() {
     overloading(obj)
     isolation(obj);
     dying(obj);
-    
   }
 }
 
 /**
- * Функция проходится по массивам toAliveArr, tokillArr 
+ * Функция проходится по массивам toAliveArr, toKillArr 
  * и убивает или оживляет клетку.
  * Если живых клеток не осталось , выводит на экран сообщение Game over!
  */
@@ -91,7 +89,7 @@ function newIteration() {
     aliveCell(el);
     matrix[el][el] = 1;
   }
-  for (const el of tokillArr) {
+  for (const el of toKillArr) {
     killCell(el);
     matrix[el][el] = 0;
   }
@@ -104,34 +102,31 @@ function newIteration() {
  * @returns Boolean
  */
 function livingCells() {
-  for (const el of matrix) {
-    for (const [key, value] of Object.entries(el)) {
-      if (value) {
-        return true;
-      }
-    }
+  for (let i = 0; i < matrix.length; i++) {
+    if (matrix[i][i]) {
+      return true;
+    }  
   }
   return false;
 }
+
 
 /**
  * Функция отрисовывает поле с тем количеством клеток 
  * которое указано в инпутах
  */
 function fillMainWrapper() {
-  $('.generate-form').addClass('display-none')
-  $('.button').removeClass('display-none')
-  $('.main-wrapper').removeClass('display-none')
-
+  $('.generate-form').addClass('display-none');
+  $('.button').removeClass('display-none');
+  $('.main-wrapper').removeClass('display-none');
 
   n = parseInt( $('.nInput').val() );
   m = parseInt( $('.mInput').val() );
 
-  
   for (let i = 0; i < m; i++) {
     for (let j = 0; j < n; j++) {
       
-      res =  Math.round(Math.random() ) // рандомно выбираем жива клетка или мертва
+      let res =  Math.round(Math.random() ) // рандомно выбираем жива клетка или мертва
       
       if (res) { // если рандомное чило 1 
         $('.main-wrapper').append( // добавляем живую клетку
@@ -147,183 +142,94 @@ function fillMainWrapper() {
         );
       }
       
-      // добавляем id и значение клетки в массив matrix
-      matrix.push( { [counterId]: res } );
-      counterId++;
+      matrix.push( { [counterId]: res } ); // добавляем id и значение клетки в массив matrix
+      counterId++;  
     }
   }
   
   let widthOfCell = $('.cellBox').width();
-  $('.main-wrapper').css('max-width', ((widthOfCell + 7) * n) ); // делаю поле клеток по ширине равным количеству клеток * ширину 1 клетки
+  $('.main-wrapper').css('max-width', ((widthOfCell + 6) * n) ); // делаю поле клеток по ширине равным количеству клеток * ширину 1 клетки
   
 }
 
 
-
 function killCell(cellId) {
-  $(`#${cellId}`)
-        .addClass('deathCell')
-        .removeClass('aliveCell');
+  $(`#${cellId}`).addClass('deathCell').removeClass('aliveCell');
 }
 function aliveCell(cellId) {
-  $(`#${cellId}`)
-        .addClass('aliveCell')
-        .removeClass('deathCell');
+  $(`#${cellId}`).addClass('aliveCell').removeClass('deathCell');
 }
 
 
-
+/**
+ * Оператор «Активация»
+ * 
+ * @param {Object} obj 
+ * @returns void
+ */
 function activation(obj) {
-  console.log('matrix[obj.i])[0]', matrix);
-  console.log('matrix[obj.i])[1]', obj);
-  if (Object.values(matrix[obj.i])[0] == 1) {
+  if (Object.values(matrix[obj.i])[0] == 1) { // проверка что клетка мерва 
     return;
   }
 
-  let count = 0; // счетчик живых соседей
-  if (Object.values(matrix[obj.i])[0] == 0) { //«Активация» если клетка мерта 
+  let count = countAliveNeighbors(obj);
 
-    if (obj.leftNeighbor !== null) { // если сосед есть прибавляем его значение которое равно либо 1 либо 0
-      count += Object.values(matrix[obj.leftNeighbor])[0];
-    }
-    if (obj.rirhtNeighbor !== null) {
-      count += Object.values(matrix[obj.rirhtNeighbor])[0];
-    }
-    if (obj.upNeighbor !== null) {
-      count += Object.values(matrix[obj.upNeighbor])[0];
-    }
-    if (obj.downNeighbor !== null) {
-      count += Object.values(matrix[obj.downNeighbor])[0];
-    }
-    if (obj.downLeftNeighbor !== null) {
-      count += Object.values(matrix[obj.downLeftNeighbor])[0];
-    }
-    if (obj.downRirhtNeighbor !== null) {
-      count += Object.values(matrix[obj.downRirhtNeighbor])[0];
-    }
-    if (obj.upLeftNeighbor !== null) {
-      count += Object.values(matrix[obj.upLeftNeighbor])[0];
-    }
-    if (obj.upRirhtNeighbor !== null) {
-      count += Object.values(matrix[obj.upRirhtNeighbor])[0];
-    }
-  }
-  if (count == 3) {
+  if (count == 3) { // условие оператора
     toAliveArr.push(obj.i);
   }
 }
 
+/**
+ * Оператор «Перегрузка»
+ * 
+ * @param {Object} obj 
+ * @returns void
+ */
 function overloading(obj) {
-  if (Object.values(matrix[obj.i])[0] == 0) {
+  if (Object.values(matrix[obj.i])[0] == 0) { // проверка что клетка живая 
     return;
   }
 
-  let count = 0; // счетчик живых соседей
-  if (Object.values(matrix[obj.i])[0] == 1) { //«Перегрузка» если клетка жива 
+  let count = countAliveNeighbors(obj);
 
-    if (obj.leftNeighbor !== null) { // если сосед есть прибавляем его значение которое равно либо 1 либо 0
-      count += Object.values(matrix[obj.leftNeighbor])[0];
-    }
-    if (obj.rirhtNeighbor !== null) {
-      count += Object.values(matrix[obj.rirhtNeighbor])[0];
-    }
-    if (obj.upNeighbor !== null) {
-      count += Object.values(matrix[obj.upNeighbor])[0];
-    }
-    if (obj.downNeighbor !== null) {
-      count += Object.values(matrix[obj.downNeighbor])[0];
-    }
-    if (obj.downLeftNeighbor !== null) {
-      count += Object.values(matrix[obj.downLeftNeighbor])[0];
-    }
-    if (obj.downRirhtNeighbor !== null) {
-      count += Object.values(matrix[obj.downRirhtNeighbor])[0];
-    }
-    if (obj.upLeftNeighbor !== null) {
-      count += Object.values(matrix[obj.upLeftNeighbor])[0];
-    }
-    if (obj.upRirhtNeighbor !== null) {
-      count += Object.values(matrix[obj.upRirhtNeighbor])[0];
-    }
-  }
-  if (Object.values(matrix[obj.i])[0] == 1 && count >= 4) {
-    tokillArr.push(obj.i);
+  if (count >= 4) { // условие оператора
+    toKillArr.push(obj.i);
   }
 }
 
+/**
+ * Оператор «Изоляция»
+ * 
+ * @param {Object} obj 
+ * @returns void
+ */
 function isolation(obj) {
-  if (Object.values(matrix[obj.i])[0] == 0) {
+  if (Object.values(matrix[obj.i])[0] == 0) { // проверка что клетка живая 
     return;
   }
 
-  let count = 0; // счетчик живых соседей
-  if (Object.values(matrix[obj.i])[0] == 1) { //Изоляция если клетка жива 
+  let count = countAliveNeighbors(obj);
 
-    if (obj.leftNeighbor !== null) { // если сосед есть прибавляем его значение которое равно либо 1 либо 0
-      count += Object.values(matrix[obj.leftNeighbor])[0];
-    }
-    if (obj.rirhtNeighbor !== null) {
-      count += Object.values(matrix[obj.rirhtNeighbor])[0];
-    }
-    if (obj.upNeighbor !== null) {
-      count += Object.values(matrix[obj.upNeighbor])[0];
-    }
-    if (obj.downNeighbor !== null) {
-      count += Object.values(matrix[obj.downNeighbor])[0];
-    }
-    if (obj.downLeftNeighbor !== null) {
-      count += Object.values(matrix[obj.downLeftNeighbor])[0];
-    }
-    if (obj.downRirhtNeighbor !== null) {
-      count += Object.values(matrix[obj.downRirhtNeighbor])[0];
-    }
-    if (obj.upLeftNeighbor !== null) {
-      count += Object.values(matrix[obj.upLeftNeighbor])[0];
-    }
-    if (obj.upRirhtNeighbor !== null) {
-      count += Object.values(matrix[obj.upRirhtNeighbor])[0];
-    }
-  }
-  if (Object.values(matrix[obj.i])[0] == 1 && count <= 1) {
-    tokillArr.push(obj.i);
+  if ( count <= 1) { // условие оператора
+    toKillArr.push(obj.i);
   }
 }
 
+/**
+ * Оператор «Вымирание»
+ * 
+ * @param {Object} obj 
+ * @returns void
+ */
 function dying(obj) {
-  if (Object.values(matrix[obj.i])[0] == 0) {
+  if (Object.values(matrix[obj.i])[0] == 0) { // проверка что клетка живая 
     return;
   }
 
-  let count = 0; // счетчик живых соседей
-  if (Object.values(matrix[obj.i])[0] == 1) { //«Вымирание» если клетка жива 
+  let count = countAliveNeighbors(obj); 
 
-    if (obj.leftNeighbor !== null) { // если сосед есть прибавляем его значение которое равно либо 1 либо 0
-      count += Object.values(matrix[obj.leftNeighbor])[0];
-    }
-    if (obj.rirhtNeighbor !== null) {
-      count += Object.values(matrix[obj.rirhtNeighbor])[0];
-    }
-    if (obj.upNeighbor !== null) {
-      count += Object.values(matrix[obj.upNeighbor])[0];
-    }
-    if (obj.downNeighbor !== null) {
-      count += Object.values(matrix[obj.downNeighbor])[0];
-    }
-    if (obj.downLeftNeighbor !== null) {
-      count += Object.values(matrix[obj.downLeftNeighbor])[0];
-    }
-    if (obj.downRirhtNeighbor !== null) {
-      count += Object.values(matrix[obj.downRirhtNeighbor])[0];
-    }
-    if (obj.upLeftNeighbor !== null) {
-      count += Object.values(matrix[obj.upLeftNeighbor])[0];
-    }
-    if (obj.upRirhtNeighbor !== null) {
-      count += Object.values(matrix[obj.upRirhtNeighbor])[0];
-    }
-  }
-  if ( count !== 2 || count !== 3) {
-    tokillArr.push(obj.i);
+  if ( count !== 2 || count !== 3) { // условие оператора
+    toKillArr.push(obj.i);
   }
 }
 
@@ -334,4 +240,42 @@ function dying(obj) {
  function next() {
   process();
   newIteration();
+}
+
+
+/**
+ * Функция считает количество живых соседей
+ * 
+ * @param {Object} obj 
+ * @returns {Integer} count
+ */
+function countAliveNeighbors(obj) {
+  let count = 0; // счетчик живых соседей
+
+  if (obj.leftNeighbor !== null) { // если сосед есть прибавляем его значение которое равно 1 или 0
+    count += Object.values(matrix[obj.leftNeighbor])[0];
+  }
+  if (obj.rirhtNeighbor !== null) {
+    count += Object.values(matrix[obj.rirhtNeighbor])[0];
+  }
+  if (obj.upNeighbor !== null) {
+    count += Object.values(matrix[obj.upNeighbor])[0];
+  }
+  if (obj.downNeighbor !== null) {
+    count += Object.values(matrix[obj.downNeighbor])[0];
+  }
+  if (obj.downLeftNeighbor !== null) {
+    count += Object.values(matrix[obj.downLeftNeighbor])[0];
+  }
+  if (obj.downRirhtNeighbor !== null) {
+    count += Object.values(matrix[obj.downRirhtNeighbor])[0];
+  }
+  if (obj.upLeftNeighbor !== null) {
+    count += Object.values(matrix[obj.upLeftNeighbor])[0];
+  }
+  if (obj.upRirhtNeighbor !== null) {
+    count += Object.values(matrix[obj.upRirhtNeighbor])[0];
+  }
+
+  return count;
 }
