@@ -5,15 +5,15 @@ let n ; // длинна поля
 // массив объектов всех клеток
 // одна клетка представляет собой объект 
 // с полем (id клетки) и значение (1 или 0) жива или мертва 
-let matrix = [];
+const matrix = [];
 
 // счетчик для того что бы задать id каждой клетке
 let counterId = 0;
 
 // массив элементво которые будут убиты в начале нового тика
-let toKillArr = [];
+const toKillArr = [];
 // массив элементво которые будут активированы в начале нового тика
-let toAliveArr = [];
+const toAliveArr = [];
 
 
 
@@ -57,7 +57,7 @@ function process() {
       downRirhtNeighbor = null;
     } 
 
-    let obj = {
+    const obj = {
       i,
       leftNeighbor,
       rirhtNeighbor,
@@ -82,7 +82,8 @@ function process() {
  * Если живых клеток не осталось , выводит на экран сообщение Game over!
  */
 function newIteration() {
-  if ( !livingCells()) {
+  const hasLivingCells = livingCells();
+  if (!hasLivingCells) {
     alert('Game over!')
   }
   for (const el of toAliveArr) {
@@ -118,6 +119,7 @@ function livingCells() {
 function fillMainWrapper() {
   $('.generate-form').addClass('display-none');
   $('.button').removeClass('display-none');
+  $('.button').parent().removeClass('display-none');
   $('.main-wrapper').removeClass('display-none');
 
   n = parseInt( $('.nInput').val() );
@@ -126,7 +128,7 @@ function fillMainWrapper() {
   for (let i = 0; i < m; i++) {
     for (let j = 0; j < n; j++) {
       
-      let res =  Math.round(Math.random() ) // рандомно выбираем жива клетка или мертва
+      const res =  Math.round(Math.random() ) // рандомно выбираем жива клетка или мертва
       
       if (res) { // если рандомное чило 1 
         $('.main-wrapper').append( // добавляем живую клетку
@@ -147,7 +149,7 @@ function fillMainWrapper() {
     }
   }
   
-  let widthOfCell = $('.cellBox').width();
+  const widthOfCell = $('.cellBox').width();
   $('.main-wrapper').css('max-width', ((widthOfCell + 6) * n) ); // делаю поле клеток по ширине равным количеству клеток * ширину 1 клетки
   
 }
