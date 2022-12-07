@@ -27,3 +27,9 @@
   background-color: #e48abb;
 }
 
+.button {
+  margin: 0 14vw;
+  height: 104px;
+  width: 79%;
+  font-size: 47px;
+}

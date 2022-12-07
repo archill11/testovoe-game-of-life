@@ -1,4 +1,4 @@
-let m = 20; //высота
+let m = 18; //высота
 let n = 20; // длинна
 
 let widthOfCell = 35;
@@ -13,19 +13,23 @@ let toAliveArr = [];
 fillMainWrapper();
 // process();
 
-let yhu = 0;
-while( true ) {
-  let t = livingCells();
-  if ( t == false) { 
-    break;
-  }
-  if ( yhu > 5) { 
-    break;
-  }
+function ittr() {
   process();
-  newIteration();
-  // alert('new')
+    newIteration();
 }
+// let yhu = 0;
+// while( true ) {
+//   let t = livingCells();
+//   if ( t == false) { 
+//     break;
+//   }
+//   if ( yhu > 5) { 
+//     break;
+//   }
+//   process();
+//   newIteration();
+//   // alert('new')
+// }
 
 
 
