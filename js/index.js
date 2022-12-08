@@ -69,10 +69,12 @@ function process() {
       upRirhtNeighbor,
     }
 
-    activation(obj);
-    overloading(obj)
-    isolation(obj);
-    dying(obj);
+    const count = countAliveNeighbors(obj);
+
+    activation(obj, count);
+    overloading(obj, count)
+    isolation(obj, count);
+    dying(obj, count);
   }
 }
 
@@ -170,12 +172,10 @@ function aliveCell(cellId) {
  * @param {Object} obj 
  * @returns void
  */
-function activation(obj) {
+function activation(obj, count) {
   if (Object.values(matrix[obj.i])[0] == 1) { // проверка что клетка мерва 
     return;
   }
-
-  let count = countAliveNeighbors(obj);
 
   if (count == 3) { // условие оператора
     toAliveArr.push(obj.i);
@@ -189,12 +189,10 @@ function activation(obj) {
  * @param {Object} obj 
  * @returns void
  */
-function overloading(obj) {
+function overloading(obj, count) {
   if (Object.values(matrix[obj.i])[0] == 0) { // проверка что клетка живая 
     return;
   }
-
-  let count = countAliveNeighbors(obj);
 
   if (count >= 4) { // условие оператора
     toKillArr.push(obj.i);
@@ -208,12 +206,10 @@ function overloading(obj) {
  * @param {Object} obj 
  * @returns void
  */
-function isolation(obj) {
+function isolation(obj, count) {
   if (Object.values(matrix[obj.i])[0] == 0) { // проверка что клетка живая 
     return;
   }
-
-  let count = countAliveNeighbors(obj);
 
   if ( count <= 1) { // условие оператора
     toKillArr.push(obj.i);
@@ -222,16 +218,15 @@ function isolation(obj) {
 
 /**
  * Оператор «Вымирание»
+ * Активная клетка останется такой, только если у неё ровно 2 или 3 активных соседа, иначе «умрет» в следующем состоянии поля.
  * 
  * @param {Object} obj 
  * @returns void
  */
-function dying(obj) {
+function dying(obj, count) {
   if (Object.values(matrix[obj.i])[0] == 0) { // проверка что клетка живая 
     return;
   }
-
-  let count = countAliveNeighbors(obj); 
 
   if ( count !== 2 || count !== 3) { // условие оператора
     toKillArr.push(obj.i);
@@ -257,30 +252,14 @@ function dying(obj) {
 function countAliveNeighbors(obj) {
   let count = 0; // счетчик живых соседей
 
-  if (obj.leftNeighbor !== null) { // если сосед есть прибавляем его значение которое равно 1 или 0
-    count += Object.values(matrix[obj.leftNeighbor])[0];
-  }
-  if (obj.rirhtNeighbor !== null) {
-    count += Object.values(matrix[obj.rirhtNeighbor])[0];
-  }
-  if (obj.upNeighbor !== null) {
-    count += Object.values(matrix[obj.upNeighbor])[0];
-  }
-  if (obj.downNeighbor !== null) {
-    count += Object.values(matrix[obj.downNeighbor])[0];
-  }
-  if (obj.downLeftNeighbor !== null) {
-    count += Object.values(matrix[obj.downLeftNeighbor])[0];
-  }
-  if (obj.downRirhtNeighbor !== null) {
-    count += Object.values(matrix[obj.downRirhtNeighbor])[0];
-  }
-  if (obj.upLeftNeighbor !== null) {
-    count += Object.values(matrix[obj.upLeftNeighbor])[0];
-  }
-  if (obj.upRirhtNeighbor !== null) {
-    count += Object.values(matrix[obj.upRirhtNeighbor])[0];
-  }
+  Object.keys(obj).forEach(key => {
+    if (key == 'i') { // значение собственной клетки не учитывается
+      return;
+    }
+    if (obj[key] !== null) { // если сосед есть прибавляем его значение которое равно 1 или 0
+      count += Object.values(matrix[obj[key]])[0];
+    }
+  });
 
   return count;
 }
